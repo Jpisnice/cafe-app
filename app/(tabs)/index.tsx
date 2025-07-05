@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -13,24 +13,31 @@ import { StatusBar } from 'expo-status-bar';
 import { FeaturedItem } from '../../components/FeaturedItem';
 import { CategoryItem } from '../../components/CategoryItem';
 import { CoffeeItem } from '../../components/CoffeeItem';
+import { OrderingModal } from '../../components/OrderingModal';
 
 const featuredItems = [
   {
     id: 1,
     title: 'Morning Latte',
+    name: 'Morning Latte',
     description: 'Start your day with our signature latte.',
+    price: '$4.00',
     image: 'https://images.unsplash.com/photo-1541167760496-1628856ab772?w=300&h=200&fit=crop',
   },
   {
     id: 2,
     title: 'Iced Coffee Delight',
+    name: 'Iced Coffee Delight',
     description: 'Cool down with our refreshing iced coffee.',
+    price: '$3.50',
     image: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?w=300&h=200&fit=crop',
   },
   {
     id: 3,
     title: 'Fresh Pastries',
+    name: 'Fresh Pastries',
     description: 'Enjoy our freshly baked pastries.',
+    price: '$2.75',
     image: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?w=300&h=200&fit=crop',
   },
 ];
@@ -61,29 +68,53 @@ const coffeeItems = [
     id: 1,
     name: 'Espresso',
     description: 'Strong and bold',
+    price: '$2.50',
     image: 'https://images.unsplash.com/photo-1510591509098-f4fdc6d0ff04?w=150&h=150&fit=crop',
   },
   {
     id: 2,
     name: 'Cappuccino',
     description: 'Creamy and rich',
+    price: '$3.75',
     image: 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?w=150&h=150&fit=crop',
   },
   {
     id: 3,
     name: 'Americano',
     description: 'Classic black coffee',
+    price: '$3.00',
     image: 'https://images.unsplash.com/photo-1459257831348-f0cdd359235f?w=150&h=150&fit=crop',
   },
   {
     id: 4,
     name: 'Latte',
     description: 'Milky and smooth',
+    price: '$4.00',
     image: 'https://images.unsplash.com/photo-1541167760496-1628856ab772?w=150&h=150&fit=crop',
   },
 ];
 
 export default function HomeScreen() {
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+
+  const handleItemPress = (item: any) => {
+    setSelectedItem(item);
+    setIsModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalVisible(false);
+    setSelectedItem(null);
+  };
+
+  const handleAddToCartFromModal = (customization: { milk: string; sugar: string }) => {
+    // Here you would add the customized item to cart
+    console.log('Added to cart:', selectedItem, customization);
+    setIsModalVisible(false);
+    setSelectedItem(null);
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar style="dark" />
@@ -117,7 +148,11 @@ export default function HomeScreen() {
           contentContainerStyle={styles.featuredContainer}
         >
           {featuredItems.map((item) => (
-            <FeaturedItem key={item.id} item={item} />
+            <FeaturedItem 
+              key={item.id} 
+              item={item} 
+              onPress={() => handleItemPress(item)}
+            />
           ))}
         </ScrollView>
 
@@ -142,11 +177,19 @@ export default function HomeScreen() {
             <CoffeeItem
               key={item.id}
               item={item}
-              onPress={() => console.log('Coffee item pressed:', item.name)}
+              onPress={() => handleItemPress(item)}
             />
           ))}
         </View>
       </ScrollView>
+
+      {/* Ordering Modal */}
+      <OrderingModal
+        visible={isModalVisible}
+        item={selectedItem}
+        onClose={handleCloseModal}
+        onAddToCart={handleAddToCartFromModal}
+      />
     </SafeAreaView>
   );
 }

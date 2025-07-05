@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { FilterChip } from '../../components/FilterChip';
 import { MenuItem } from '../../components/MenuItem';
+import { OrderingModal } from '../../components/OrderingModal';
 
 const filterOptions = ['Hot', 'Cold', 'Vegan', 'Bestsellers'];
 
@@ -90,9 +91,24 @@ const drinkItems = [
 
 export default function MenuScreen() {
   const [activeFilter, setActiveFilter] = useState('Hot');
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<any>(null);
 
-  const handleAddToCart = (itemName: string) => {
-    console.log('Added to cart:', itemName);
+  const handleAddToCart = (item: any) => {
+    setSelectedItem(item);
+    setIsModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalVisible(false);
+    setSelectedItem(null);
+  };
+
+  const handleAddToCartFromModal = (customization: { milk: string; sugar: string }) => {
+    // Here you would add the customized item to cart
+    console.log('Added to cart:', selectedItem, customization);
+    setIsModalVisible(false);
+    setSelectedItem(null);
   };
 
   return (
@@ -140,7 +156,7 @@ export default function MenuScreen() {
             <MenuItem
               key={item.id}
               item={item}
-              onAddToCart={() => handleAddToCart(item.name)}
+              onAddToCart={() => handleAddToCart(item)}
             />
           ))}
         </View>
@@ -155,11 +171,19 @@ export default function MenuScreen() {
             <MenuItem
               key={item.id}
               item={item}
-              onAddToCart={() => handleAddToCart(item.name)}
+              onAddToCart={() => handleAddToCart(item)}
             />
           ))}
         </View>
       </ScrollView>
+
+      {/* Ordering Modal */}
+      <OrderingModal
+        visible={isModalVisible}
+        item={selectedItem}
+        onClose={handleCloseModal}
+        onAddToCart={handleAddToCartFromModal}
+      />
     </SafeAreaView>
   );
 }

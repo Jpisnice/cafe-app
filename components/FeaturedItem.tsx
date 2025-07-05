@@ -1,24 +1,27 @@
 import React from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
+import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
 
 interface FeaturedItemProps {
   item: {
     id: number;
     title: string;
+    name: string;
     description: string;
+    price: string;
     image: string;
   };
+  onPress?: () => void;
 }
 
-export function FeaturedItem({ item }: FeaturedItemProps) {
+export function FeaturedItem({ item, onPress }: FeaturedItemProps) {
   return (
-    <View style={styles.featuredItem}>
+    <TouchableOpacity style={styles.featuredItem} onPress={onPress}>
       <Image source={{ uri: item.image }} style={styles.featuredImage} />
       <View style={styles.featuredContent}>
         <Text style={styles.featuredTitle}>{item.title}</Text>
         <Text style={styles.featuredDescription}>{item.description}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
