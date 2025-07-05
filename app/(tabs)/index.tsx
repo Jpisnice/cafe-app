@@ -14,6 +14,7 @@ import { FeaturedItem } from '../../components/FeaturedItem';
 import { CategoryItem } from '../../components/CategoryItem';
 import { CoffeeItem } from '../../components/CoffeeItem';
 import { OrderingModal } from '../../components/OrderingModal';
+import { CartModal } from '../../components/CartModal';
 
 const featuredItems = [
   {
@@ -97,6 +98,8 @@ const coffeeItems = [
 export default function HomeScreen() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [isCartVisible, setIsCartVisible] = useState(false);
+  const [cartItems, setCartItems] = useState<any[]>([]);
 
   const handleItemPress = (item: any) => {
     setSelectedItem(item);
@@ -109,10 +112,53 @@ export default function HomeScreen() {
   };
 
   const handleAddToCartFromModal = (customization: { milk: string; sugar: string }) => {
-    // Here you would add the customized item to cart
-    console.log('Added to cart:', selectedItem, customization);
+    if (selectedItem) {
+      const customizationText = `${customization.sugar === 'None' ? 'No Sugar' : customization.sugar}, ${customization.milk}`;
+      
+      const newCartItem = {
+        id: Date.now(), // Simple ID generation
+        name: selectedItem.name,
+        price: parseFloat(selectedItem.price.replace('$', '')),
+        quantity: 1,
+        customization: customizationText,
+      };
+
+      setCartItems(prevItems => {
+        // Check if item with same name and customization already exists
+        const existingItemIndex = prevItems.findIndex(
+          item => item.name === newCartItem.name && item.customization === newCartItem.customization
+        );
+
+        if (existingItemIndex >= 0) {
+          // Update quantity of existing item
+          const updatedItems = [...prevItems];
+          updatedItems[existingItemIndex].quantity += 1;
+          return updatedItems;
+        } else {
+          // Add new item
+          return [...prevItems, newCartItem];
+        }
+      });
+
+      console.log('Added to cart:', selectedItem, customization);
+    }
     setIsModalVisible(false);
     setSelectedItem(null);
+  };
+
+  const handleCartPress = () => {
+    setIsCartVisible(true);
+  };
+
+  const handleCartClose = () => {
+    setIsCartVisible(false);
+  };
+
+  const handleCheckout = () => {
+    // Handle checkout logic here
+    console.log('Proceeding to checkout with items:', cartItems);
+    setIsCartVisible(false);
+    // You might navigate to a payment screen or show a success message
   };
 
   return (
@@ -122,8 +168,13 @@ export default function HomeScreen() {
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>BrewBuddy</Text>
-        <TouchableOpacity style={styles.cartButton}>
+        <TouchableOpacity style={styles.cartButton} onPress={handleCartPress}>
           <Ionicons name="cart-outline" size={24} color="#1b140e" />
+          {cartItems.length > 0 && (
+            <View style={styles.cartBadge}>
+              <Text style={styles.cartBadgeText}>{cartItems.length}</Text>
+            </View>
+          )}
         </TouchableOpacity>
       </View>
 
@@ -190,6 +241,14 @@ export default function HomeScreen() {
         onClose={handleCloseModal}
         onAddToCart={handleAddToCartFromModal}
       />
+
+      {/* Cart Modal */}
+      <CartModal
+        visible={isCartVisible}
+        cartItems={cartItems}
+        onClose={handleCartClose}
+        onCheckout={handleCheckout}
+      />
     </SafeAreaView>
   );
 }
@@ -215,6 +274,23 @@ const styles = StyleSheet.create({
   },
   cartButton: {
     padding: 8,
+    position: 'relative',
+  },
+  cartBadge: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    backgroundColor: '#e57f19',
+    borderRadius: 10,
+    minWidth: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cartBadgeText: {
+    color: '#1b140e',
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   searchContainer: {
     paddingHorizontal: 16,
